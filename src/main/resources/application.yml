@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: People10-Dashboard
+  datasource:
+    url: jdbc:mysql://3.82.223.126:3306/dashboard
+    username: ${DB_USERNAME:dashboard_user}
+    password: 
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  ai:
+    openai:
+      api-key: 
+      base-url: https://api.openai.com/
+      chat:
+        model: gpt-3.5-turbo 
+springdoc:
+  default-produces-media-type: application/json
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+  packages-to-scan: com.people10.dashboard.controller

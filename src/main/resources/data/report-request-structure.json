@@ -1,0 +1,99 @@
+{
+  "teamId": 1,
+  "managerId": 2,
+  "clientName": "Allegiant",
+  "opcoId": 3,
+  "startDate": "2025-04-14",
+  "endDate": "2025-04-27",
+
+  "milestones": [
+    {
+      "sequenceNo": 1,
+      "projectName": "Car Rentals",
+      "detail": "QAT testing and regression",
+      "milestoneDate": "2025-04-25",
+      "ragStatusId": 1
+    },
+    {
+      "sequenceNo": 2,
+      "projectName": "GA4 Update",
+      "detail": "Updated events for analytics",
+      "milestoneDate": "2025-04-19",
+      "ragStatusId": 1
+    }
+  ],
+
+  "workloadVisibility": {
+    "value": "4 R",
+    "ragStatusId": 2
+  },
+
+  "adequateQuality": {
+    "value": "100% test coverage, full regression",
+    "ragStatusId": 1
+  },
+
+  "escalations": {
+    "hasEscalation": false,
+    "details": "N/A",
+    "ragStatusId": 1
+  },
+
+  "trainings": {
+    "trainingDetails": "Copilot + AI COE Trainings",
+    "totalHours": 34,
+    "ragStatusId": 1
+  },
+
+  "billability": {
+    "billedResources": 9,
+    "unbilledResources": 0,
+    "leavesBilled": 5,
+    "leavesUnbilled": 0,
+    "holidays": 1,
+    "overallBillabilityPercent": 93.83,
+    "ragStatusId": 1
+  },
+
+  "improvements": [
+    {
+      "sequenceNo": 1,
+      "area": "Learning GenAI concepts",
+      "valueAddition": "3 people completed AWS AI course",
+      "ragStatusId": 2
+    }
+  ],
+
+  "nonAdherence": {
+    "nonAdherenceValue": "No",
+    "count": 0,
+    "impact": "",
+    "timeToResolve": null,
+    "ragStatusId": 1
+  },
+
+  "timesheets": {
+    "clientDefaulters": 0,
+    "erpDefaulters": 0,
+    "ragStatusId": 1
+  },
+
+  "innovation": {
+    "details": "None",
+    "valueAdded": "N/A",
+    "ragStatusId": 1
+  },
+
+  "risk": {
+    "riskValue": "No",
+    "details": "",
+    "ragStatusId": 1
+  },
+
+  "showcases": [
+    {
+      "sequenceNo": 1,
+      "detail": "Vikas earned AWS Certified AI Practitioner"
+    }
+  ]
+}
