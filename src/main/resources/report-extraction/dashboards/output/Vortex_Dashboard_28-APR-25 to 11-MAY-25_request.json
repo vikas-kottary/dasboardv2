@@ -1,0 +1,104 @@
+{
+  "teamId": 16,
+  "managerId": 16,
+  "clientName": "Allegiant",
+  "opcoId": 1,
+  "startDate": "2025-04-28",
+  "endDate": "2025-05-11",
+  "milestones": [
+    {
+      "sequenceNo": 1,
+      "projectName": "JBoss Decommission",
+      "detail": "DISCEXPORT-WEB artifact decommissioned in production successfully",
+      "milestoneDate": "2025-05-08",
+      "ragStatusId": 2
+    },
+    {
+      "sequenceNo": 2,
+      "projectName": "JBoss Migration",
+      "detail": "Flight Alerts JBoss Repo migrated to Spring Boot",
+      "milestoneDate": "2025-05-09",
+      "ragStatusId": 2
+    },
+    {
+      "sequenceNo": 3,
+      "projectName": "Trax",
+      "detail": "Development completed for using the status field for determining Out of Service status for Work Orders",
+      "milestoneDate": "2025-05-06",
+      "ragStatusId": 2
+    }
+  ],
+  "workloadVisibility": {
+    "value": "4",
+    "ragStatusId": 2
+  },
+  "adequateQuality": {
+    "value": "Release for the decommissioned artifact went smoothly and the analysis for the documented thoroughly",
+    "ragStatusId": 2
+  },
+  "escalations": {
+    "hasEscalation": "No",
+    "details": "",
+    "ragStatusId": 2
+  },
+  "trainings": {
+    "trainingDetails": "CoPilot Training by Allegiant & Mandatory Training by P10",
+    "totalHours": 15,
+    "ragStatusId": 2
+  },
+  "billability": {
+    "billedResources": 7.0,
+    "unbilledResources": 1.0,
+    "leavesBilled": 4.0,
+    "leavesUnbilled": 0.0,
+    "holidays": 0,
+    "overallBillabilityPercent": 94.37,
+    "ragStatusId": 2
+  },
+  "improvements": [
+    {
+      "sequenceNo": 1,
+      "area": "Unit Testing",
+      "valueAddition": "Overall Coverage % for flight alerts repo increased to 90%",
+      "ragStatusId": 2
+    },
+    {
+      "sequenceNo": 2,
+      "area": "QA Automation",
+      "valueAddition": "Automated test cases for MX comments added",
+      "ragStatusId": 2
+    }
+  ],
+  "nonAdherence": {
+    "nonAdherenceValue": "0",
+    "count": 0,
+    "impact": "",
+    "timeToResolve": "",
+    "ragStatusId": 2
+  },
+  "timesheets": {
+    "clientDefaulters": 0,
+    "erpDefaulters": 0,
+    "ragStatusId": 2
+  },
+  "innovation": {
+    "details": "",
+    "valueAdded": "No innovation added in the last 2 weeks",
+    "ragStatusId": 3
+  },
+  "risk": {
+    "riskValue": "Yes",
+    "details": "Gatway timeout errors with Trax APIs causing delays in deliverable timelines",
+    "ragStatusId": 4
+  },
+  "showcases": [
+    {
+      "sequenceNo": 1,
+      "detail": ""
+    },
+    {
+      "sequenceNo": 2,
+      "detail": ""
+    }
+  ]
+}

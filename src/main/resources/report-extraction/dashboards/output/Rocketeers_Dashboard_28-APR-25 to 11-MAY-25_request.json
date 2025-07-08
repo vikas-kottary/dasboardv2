@@ -1,0 +1,84 @@
+{
+  "teamId": 11,
+  "managerId": 11,
+  "clientName": "Allegiant",
+  "opcoId": 2,
+  "startDate": "2025-04-28",
+  "endDate": "2025-05-11",
+  "milestones": [
+    {
+      "sequenceNo": 1,
+      "projectName": "Production",
+      "detail": "Issues Fix Fixed production issue and testing in dev environment",
+      "milestoneDate": "2025-05-07",
+      "ragStatusId": 2
+    }
+  ],
+  "workloadVisibility": {
+    "value": "4",
+    "ragStatusId": 2
+  },
+  "adequateQuality": {
+    "value": "Team had overall unit test coverage of 98.33 % in last two weeks.",
+    "ragStatusId": 2
+  },
+  "escalations": {
+    "hasEscalation": "No",
+    "details": "NA",
+    "ragStatusId": 2
+  },
+  "trainings": {
+    "trainingDetails": "Allegiant Copilot training and Mandatory Training_Collaborative Workplace: Respect & Teamwork Essentials",
+    "totalHours": 52,
+    "ragStatusId": 2
+  },
+  "billability": {
+    "billedResources": 13.0,
+    "unbilledResources": 0.0,
+    "leavesBilled": 5.0,
+    "leavesUnbilled": 0.0,
+    "holidays": 1,
+    "overallBillabilityPercent": 95.73,
+    "ragStatusId": 2
+  },
+  "improvements": [
+    {
+      "sequenceNo": 1,
+      "area": "Cross training",
+      "valueAddition": "Backend Hotels flow KT to internal team members",
+      "ragStatusId": 2
+    }
+  ],
+  "nonAdherence": {
+    "nonAdherenceValue": "None",
+    "count": 0,
+    "impact": "",
+    "timeToResolve": "",
+    "ragStatusId": 2
+  },
+  "timesheets": {
+    "clientDefaulters": 0,
+    "erpDefaulters": 0,
+    "ragStatusId": 2
+  },
+  "innovation": {
+    "details": "No innovation implemented in the project in the past 8 to 24 A weeks.",
+    "valueAdded": "None",
+    "ragStatusId": 3
+  },
+  "risk": {
+    "riskValue": "No",
+    "details": "NA",
+    "ragStatusId": 2
+  },
+  "showcases": [
+    {
+      "sequenceNo": 1,
+      "detail": ""
+    },
+    {
+      "sequenceNo": 2,
+      "detail": ""
+    }
+  ]
+}

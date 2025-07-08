@@ -1,0 +1,98 @@
+{
+  "teamId": 4,
+  "managerId": 4,
+  "clientName": "Allegiant",
+  "opcoId": 1,
+  "startDate": "2025-04-28",
+  "endDate": "2025-05-11",
+  "milestones": [
+    {
+      "sequenceNo": 1,
+      "projectName": "CAT",
+      "detail": "Microservices communications - REDIS stresms - Unit tests",
+      "milestoneDate": "2025-05-09",
+      "ragStatusId": 3
+    },
+    {
+      "sequenceNo": 2,
+      "projectName": "CAT",
+      "detail": "UI Unit tests",
+      "milestoneDate": "2025-05-09",
+      "ragStatusId": 3
+    },
+    {
+      "sequenceNo": 3,
+      "projectName": "CAT",
+      "detail": "DB migration bug fixes",
+      "milestoneDate": "2025-05-09",
+      "ragStatusId": 3
+    }
+  ],
+  "workloadVisibility": {
+    "value": "3",
+    "ragStatusId": 3
+  },
+  "adequateQuality": {
+    "value": "Unit test updates to cover > 95% for UI and microservices in progress; for new features and bug fixes",
+    "ragStatusId": 4
+  },
+  "escalations": {
+    "hasEscalation": "No",
+    "details": "Failling behind on unit tests to microservices and ui",
+    "ragStatusId": 3
+  },
+  "trainings": {
+    "trainingDetails": "Mandatory training: Respect and Teamwork essentials",
+    "totalHours": 3,
+    "ragStatusId": 2
+  },
+  "billability": {
+    "billedResources": 3.0,
+    "unbilledResources": 0.0,
+    "leavesBilled": 2.0,
+    "leavesUnbilled": 0.0,
+    "holidays": 1,
+    "overallBillabilityPercent": 92.59,
+    "ragStatusId": 2
+  },
+  "improvements": [
+    {
+      "sequenceNo": 1,
+      "area": "Code quality",
+      "valueAddition": "Enhance code coverage > 95% with unit tests for new features",
+      "ragStatusId": 3
+    }
+  ],
+  "nonAdherence": {
+    "nonAdherenceValue": "0",
+    "count": 0,
+    "impact": "",
+    "timeToResolve": "",
+    "ragStatusId": 2
+  },
+  "timesheets": {
+    "clientDefaulters": 0,
+    "erpDefaulters": 0,
+    "ragStatusId": 2
+  },
+  "innovation": {
+    "details": "",
+    "valueAdded": "",
+    "ragStatusId": 2
+  },
+  "risk": {
+    "riskValue": "Yes",
+    "details": "Allegiant devops (Rahni & team) are yet to erver back on support for OKDv4 migration /CICD support",
+    "ragStatusId": 4
+  },
+  "showcases": [
+    {
+      "sequenceNo": 1,
+      "detail": ""
+    },
+    {
+      "sequenceNo": 2,
+      "detail": ""
+    }
+  ]
+}

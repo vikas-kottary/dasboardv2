@@ -2,6 +2,7 @@ package com.people10.dashboard.service;
 
 import com.people10.dashboard.dto.ReportDto;
 import com.people10.dashboard.dto.ReportResponseDto;
+import com.people10.dashboard.dto.ReportStatus;
 import com.people10.dashboard.dto.RiskDto;
 import com.people10.dashboard.dto.ShowcaseDto;
 import com.people10.dashboard.dto.TimesheetsDto;
@@ -24,6 +25,7 @@ import com.people10.dashboard.model.report.Escalation;
 import com.people10.dashboard.model.report.Training;
 import com.people10.dashboard.model.report.Billability;
 import com.people10.dashboard.model.report.NonAdherence;
+import com.people10.dashboard.model.report.ReportHistory;
 import com.people10.dashboard.model.report.Timesheet;
 import com.people10.dashboard.model.report.Innovation;
 import com.people10.dashboard.model.report.Milestone;
@@ -45,6 +47,7 @@ import com.people10.dashboard.repository.InnovationRepository;
 import com.people10.dashboard.repository.RiskRepository;
 import com.people10.dashboard.repository.ShowcaseRepository;
 import com.people10.dashboard.repository.SummaryRepository;
+import com.people10.dashboard.repository.ReportHistoryRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -76,6 +79,7 @@ public class ReportService {
     private final RiskRepository riskRepository;
     private final ShowcaseRepository showcaseRepository;
     private final SummaryRepository summaryRepository;
+    private final ReportHistoryRepository reportHistoryRepository;
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -267,6 +271,15 @@ public class ReportService {
             }
             showcaseRepository.saveAll(showcases);
             savedReport.setShowcases(showcases);
+        }
+
+        if (savedReport != null) {
+            ReportHistory history = new ReportHistory();
+            history.setReportId(savedReport.getId());
+            history.setChangedBy("Default"); 
+            history.setNewStatus(ReportStatus.SUBMITTED);
+            history.setComment("New report created");
+            reportHistoryRepository.save(history);
         }
 
         return convertToDto(savedReport);
@@ -510,6 +523,16 @@ public class ReportService {
             savedReport.setShowcases(showcases);
         }
 
+
+        if (savedReport != null) {
+            ReportHistory history = new ReportHistory();
+            history.setReportId(savedReport.getId());
+            history.setChangedBy("Default"); 
+            history.setNewStatus(ReportStatus.SUBMITTED);
+            history.setComment("Report updated");
+            reportHistoryRepository.save(history);
+        }
+
         return convertToDto(savedReport);
     }
 
@@ -658,6 +681,16 @@ public class ReportService {
             dto.setRisk(rDto);
         }
         return dto;
+    }
+
+    public List<ReportResponseDto> getReportsByOpco(Long id) {
+        List<ReportResponseDto> reportDtos = new ArrayList<>();
+
+        reportRepository.findAll().stream()
+            .filter(report -> report.getOpco() != null && report.getOpco().getId().equals(id))
+            .forEach(report -> reportDtos.add(convertToDto(report)));
+
+        return reportDtos;
     }
 
 }
