@@ -38,7 +38,7 @@ public class SummarizeService {
     public static String buildPrompt(TeamDashboardRequest request) {
         StringBuilder prompt = new StringBuilder();
 
- /* 
+ /*
         // Priority 1 prompt
         prompt.append("You are an expert in summarizing team performance reports. Your task is to provide a concise, factual summary for management based on the provided data.\n")
             .append("\nFocus only on high-priority items:\n")
@@ -46,30 +46,34 @@ public class SummarizeService {
             .append("    Mention RAG 3 (Average) only if the update is critical or provides essential context.\n")
             .append("    Exclude all RAG 2 (Good) items unless they highlight an important exception or contrast.\n")
             .append("\nThe tone should be formal, objective, and free from unnecessary elaboration or exaggeration. Present only high-impact updates that warrant leadership attention.\n")
+            .append("Workload Visibility in weeks represents the team's visibility on the work coming up in near future. A higher value for weeks its better for the team.\n")
+            .append("Including Billability details only if the overall billability percentage is less then 90% or greater then 98%.\n")
             .append("\nReturn the summary as a short paragraph.\n")
             .append("Dont include RAG key words in the summary, just mention the status as Exceptional, Requires urgent attention, Average, Good.\n\n");
-       */
-        
+       
+        */
         // Priority 2 prompt
         prompt.append("You are an expert in summarizing team performance reports. Your task is to provide a formal and balanced summary for management that includes important and moderately important updates.\n")
             .append("Prioritize RAG 1 (Exceptional) and RAG 4 (Requires urgent attention) items.\n")
             .append("Include RAG 3 (Average).\n")
             .append("Include RAG 2 (Good) only if the update provides measurable value or shows process improvement.\n")
             .append("The tone must remain professional and fact-based—avoid marketing language, praise, or generalizations. Focus on clear, meaningful insights that are present in the report.\n")
+            .append("Workload Visibility in weeks represents the team's visibility on the work coming up in near future. A higher value for weeks its better for the team.\n")
+            .append("Including Billability details only if the overall billability percentage is less then 90% or greater then 98%.\n")
             .append("Dont include RAG key words in the summary, if required just mention the status as Exceptional, Requires urgent attention, Average, Good.\n")
             .append("Structure the output as a brief paragraph summarizing key performance points.\n\n");
-        
-   
+      /*
         // // Priority 3 prompt
-        // prompt.append("You are an expert in summarizing team performance reports. Your task is to provide a structured and comprehensive summary for management, covering insights from all RAG levels, while maintaining a formal, objective tone.\n")
-        //     .append("Start with RAG 1 (Exceptional) and RAG 4 (Requires urgent attention).\n")
-        //     .append("Include RAG 3 (Average) and RAG 2 (Good) items as needed to provide a complete and accurate overview of team performance.\n")
-        //     .append("Do not exaggerate or add subjective opinions. Avoid filler language or motivational phrases.\n")
-        //     .append("Focus on measurable outcomes, observed risks, training updates, improvements, and compliance. Return the summary as a clear paragraph suitable for senior leadership review.\n\n")
-        //     .append("Dont include RAG key words in the summary, just mention the status as Exceptional, Requires urgent attention, Average, Good.\n");
-
-        prompt.append("Workload Visibility in weeks represents the team's ability to manage and predict workload effectively. A higher value for weeks its better for the team.\n");
-        prompt.append("Including Billability details only if the overall billability percentage is less then 90% or greater then 98%.\n");
+        prompt.append("You are an expert in summarizing team performance reports. Your task is to provide a structured and comprehensive summary for management, covering insights from all RAG levels, while maintaining a formal, objective tone.\n")
+            .append("Start with RAG 1 (Exceptional) and RAG 4 (Requires urgent attention).\n")
+            .append("Include RAG 3 (Average) and RAG 2 (Good) items as needed to provide a complete and accurate overview of team performance.\n")
+            .append("Do not exaggerate or add subjective opinions. Avoid filler language or motivational phrases.\n")
+            .append("Focus on measurable outcomes, observed risks, training updates, improvements, and compliance. Return the summary as a clear paragraph suitable for senior leadership review.\n\n")
+            .append("Workload Visibility in weeks represents the team's visibility on the work coming up in near future. A higher value for weeks its better for the team.\n")
+            .append("Including Billability details only if the overall billability percentage is less then 90% or greater then 98%.\n")
+            .append("Dont include RAG key words in the summary, just mention the status as Exceptional, Requires urgent attention, Average, Good.\n");
+*/ 
+       
             //   .append("Quality reflects the standard of work delivered by the team, with higher RAG statuses indicating better quality outcomes.\n")
             //   .append("Escalations indicate issues that require immediate attention, with higher RAG statuses signaling more critical situations.\n")
             //   .append("Trainings reflect the team's commitment to skill development, with higher RAG statuses indicating more effective training programs.\n")

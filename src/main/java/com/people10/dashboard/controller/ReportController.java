@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -17,17 +18,20 @@ import java.util.List;
 public class ReportController {
     private final ReportService reportService;
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'OPCO', 'ADMIN', 'MANAGEMENT')")
     @GetMapping
     public ResponseEntity<List<ReportResponseDto>> getAllReports() {
         return ResponseEntity.ok(reportService.getAllReports());
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'OPCO', 'ADMIN', 'MANAGEMENT')")
     @GetMapping("/{id}")
     public ResponseEntity<ReportResponseDto> getReport(@PathVariable Long id) {
         var report = reportService.getReport(id);
         return report != null ? ResponseEntity.ok(report) : ResponseEntity.notFound().build();
     }
 
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping
     public ResponseEntity<ReportResponseDto> createReport(@Valid @RequestBody ReportDto reportDto) {
         try {
@@ -38,6 +42,7 @@ public class ReportController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('OPCO', 'ADMIN', 'MANAGEMENT')")
     @PutMapping("/{id}")
     public ResponseEntity<ReportResponseDto> updateReport(@PathVariable Long id, @Valid @RequestBody ReportDto reportDto) {
         try {
@@ -48,6 +53,7 @@ public class ReportController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('OPCO', 'ADMIN', 'MANAGEMENT')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReport(@PathVariable Long id) {
         try {
@@ -58,6 +64,7 @@ public class ReportController {
         }
     }
 
+    @PreAuthorize("hasRole('OPCO') or hasRole('ADMIN') or hasRole('MANAGEMENT')")
     @GetMapping("/opco/{id}")
     public ResponseEntity<List<ReportResponseDto>> getReportsByOpco(@PathVariable Long id) {
         var reports = reportService.getReportsByOpco(id);

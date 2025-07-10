@@ -37,7 +37,7 @@
     "ragStatusId": 2
   },
   "escalations": {
-    "hasEscalation": "No",
+    "hasEscalation": false,
     "details": "",
     "ragStatusId": 2
   },

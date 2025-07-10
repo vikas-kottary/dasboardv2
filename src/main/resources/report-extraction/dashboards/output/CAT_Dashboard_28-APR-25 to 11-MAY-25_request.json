@@ -37,7 +37,7 @@
     "ragStatusId": 4
   },
   "escalations": {
-    "hasEscalation": "No",
+    "hasEscalation": false,
     "details": "Failling behind on unit tests to microservices and ui",
     "ragStatusId": 3
   },

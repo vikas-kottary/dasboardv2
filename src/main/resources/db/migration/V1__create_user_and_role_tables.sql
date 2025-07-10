@@ -1,0 +1,14 @@
+-- User table
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    role_id BIGINT,
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+-- Role table
+CREATE TABLE roles (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
