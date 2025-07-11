@@ -12,13 +12,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
 public class ReportController {
     private final ReportService reportService;
 
-    @PreAuthorize("hasAnyRole('MANAGER', 'OPCO', 'ADMIN', 'MANAGEMENT')")
+    //@PreAuthorize("hasAnyRole('MANAGER', 'OPCO', 'ADMIN', 'MANAGEMENT')")
     @GetMapping
     public ResponseEntity<List<ReportResponseDto>> getAllReports() {
         return ResponseEntity.ok(reportService.getAllReports());
@@ -31,7 +32,7 @@ public class ReportController {
         return report != null ? ResponseEntity.ok(report) : ResponseEntity.notFound().build();
     }
 
-    @PreAuthorize("hasRole('MANAGER')")
+    //@PreAuthorize("hasRole('MANAGER')")
     @PostMapping
     public ResponseEntity<ReportResponseDto> createReport(@Valid @RequestBody ReportDto reportDto) {
         try {

@@ -47,6 +47,8 @@ public class Report {
     private LocalDate endDate;
 
     private LocalDate createdAt;
+
+    private String processStatus;
     
     // One-to-many relationships
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)

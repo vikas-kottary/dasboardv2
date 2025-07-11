@@ -29,20 +29,22 @@ public class SecurityConfig {
                     corsConfig.setAllowedHeaders(java.util.List.of("*"));
                     corsConfig.setAllowCredentials(true);
                     return corsConfig;
-            })
-        )
+            }))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/public/**", "/*", "/login**", "/error**").permitAll()
+                .requestMatchers("/api/public/**", "/*", "/login**", "/error**", "/api/auth/logout").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
                 .defaultSuccessUrl("http://localhost:3000/auth/callback", true)
             )
             .logout(logout -> logout
+                .logoutUrl("/api/auth/logout")
                 .logoutSuccessUrl("http://localhost:3000")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
             );
-
-
         return http.build();
     }
 }

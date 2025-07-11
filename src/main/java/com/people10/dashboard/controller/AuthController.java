@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Slf4j
@@ -48,8 +50,15 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        // Actual logout is handled by Spring Security, but you can instruct the frontend to clear tokens/cookies
-        return ResponseEntity.ok(Map.of("message", "Logged out"));
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        log.info("Logout endpoint called - Spring Security will handle the actual logout");
+        
+        // Spring Security's logout filter will handle:
+        // - Session invalidation
+        // - Security context clearing
+        // - Cookie deletion
+        // - Redirect to success URL
+        
+        return ResponseEntity.ok(Map.of("message", "Logout initiated"));
     }
 }

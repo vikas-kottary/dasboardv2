@@ -104,6 +104,7 @@ public class ReportService {
         report.setManager(managerRepository.findById(dto.getManagerId()).orElse(null));
         report.setOpco(opcoRepository.findById(dto.getOpcoId()).orElse(null));
         report.setClientName(dto.getClientName());
+        report.setProcessStatus("SUBMITTED");
 
         try {
             report.setStartDate(dto.getStartDate());
@@ -688,6 +689,18 @@ public class ReportService {
 
         reportRepository.findAll().stream()
             .filter(report -> report.getOpco() != null && report.getOpco().getId().equals(id))
+            .forEach(report -> reportDtos.add(convertToDto(report)));
+
+        return reportDtos;
+    }
+
+    public List<ReportResponseDto> getReportsByManager(Long id, String reportStatus) {
+        List<ReportResponseDto> reportDtos = new ArrayList<>();
+
+        reportRepository.findAll().stream()
+            .filter(report -> report.getManager() != null && report.getManager().getId().equals(id))
+            .filter(report -> reportStatus == null || reportStatus.isEmpty() || 
+                (report.getProcessStatus() != null && report.getProcessStatus().equalsIgnoreCase(reportStatus)))
             .forEach(report -> reportDtos.add(convertToDto(report)));
 
         return reportDtos;
