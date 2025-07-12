@@ -1,5 +1,7 @@
 package com.people10.dashboard.config;
 
+import com.people10.dashboard.service.CustomOAuth2UserService;
+import com.people10.dashboard.service.CustomOidcUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,10 +17,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    
+  //  private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOidcUserService customOidcUserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         log.info("Configuring security filter chain");
+      //  log.info("CustomOAuth2UserService instance: {}", customOAuth2UserService);
+        log.info("CustomOidcUserService instance: {}", customOidcUserService);
+        
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors
@@ -31,10 +39,14 @@ public class SecurityConfig {
                     return corsConfig;
             }))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/public/**", "/*", "/login**", "/error**", "/api/auth/logout").permitAll()
+                .requestMatchers( "/login**", "/error**", "/api/auth/logout").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                    //.userService(customOAuth2UserService)
+                    .oidcUserService(customOidcUserService)
+                )
                 .defaultSuccessUrl("http://localhost:3000/auth/callback", true)
             )
             .logout(logout -> logout

@@ -58,7 +58,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -69,9 +68,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReportService {
     private final ReportRepository reportRepository;
-    // private final TeamRepository teamRepository;
-    // private final ManagerRepository managerRepository;
-    // private final OpcoRepository opcoRepository;
     private final MilestoneRepository milestoneRepository;
     private final WorkloadVisibilityRepository workloadVisibilityRepository;
     private final AdequateQualityRepository adequateQualityRepository;
@@ -138,7 +134,7 @@ public class ReportService {
             savedReport.setSummary(summary);
         }
 
-        if(dto.getComment() != null) {
+        if(dto.getComment() != null && dto.getComment().getComment() != null) {
             Comment comment = new Comment();
             comment.setReport(savedReport);
             comment.setComment(dto.getComment().getComment());

@@ -12,11 +12,15 @@ import com.people10.dashboard.service.SummarizeService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -32,7 +36,7 @@ public class ManagerController {
     //     return ResponseEntity.ok(reportService.getAllReports());
     // }
 
-    //@PreAuthorize("hasAnyRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<List<ReportResponseDto>> getReportByManager(
             @PathVariable Long id,
@@ -41,7 +45,7 @@ public class ManagerController {
         return reports != null ? ResponseEntity.ok(reports) : ResponseEntity.notFound().build();
     }
 
-    //@PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/submit")
     public ResponseEntity<ReportResponseDto> createReport(@Valid @RequestBody ReportDto reportDto) {
         try {
@@ -57,6 +61,7 @@ public class ManagerController {
         return summarizeService.summarizeReport(reportText);
     }    
     
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/team-mappings")
     public ResponseEntity<List<TeamMappingResponse>> getAllTeamMappings() {
         List<TeamMapping> teamMappings = teamMappingRepository.findAll();
@@ -66,6 +71,7 @@ public class ManagerController {
         return ResponseEntity.ok(response);
     }
 
+   // @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("{id}/team-mappings")
     public ResponseEntity<List<TeamMappingResponse>> getTeamForManager(@PathVariable Long id) {
         List<TeamMapping> teamMappings = teamMappingRepository.findByManagerId(id);
@@ -118,4 +124,19 @@ public class ManagerController {
     //     var reports = reportService.getReportsByOpco(id);
     //     return reports != null ? ResponseEntity.ok(reports) : ResponseEntity.notFound().build();
     // }
+
+    @GetMapping("/test-auth")
+    public ResponseEntity<?> testAuth(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+        
+        return ResponseEntity.ok(Map.of(
+            "message", "Authentication works!",
+            "email", principal.getAttribute("email"),
+            "authorities", principal.getAuthorities(),
+            "hasManagerRole", principal.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_MANAGER"))
+        ));
+    }
 }

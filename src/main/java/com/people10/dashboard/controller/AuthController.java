@@ -24,8 +24,10 @@ public class AuthController {
     @GetMapping("/post-login")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal OAuth2User principal) {
         
-        log.info("Received request to /api/v1/auth/post-login");
+        log.info("Received request to /api/auth/post-login");
         log.info("AuthenticationPrincipal: {}", principal);
+        log.info("Authorities: {}", principal.getAuthorities());
+        
         if (principal == null) {
             return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
         }
@@ -46,6 +48,30 @@ public class AuthController {
             user.getEmail(),
             user.getName(),
             user.getRole() != null ? user.getRole().getName() : null
+        ));
+    }
+
+    @GetMapping("/debug/authorities")
+    public ResponseEntity<?> debugAuthorities(@AuthenticationPrincipal OAuth2User principal) {
+        log.info("=== DEBUG AUTHORITIES ENDPOINT ===");
+        if (principal == null) {
+            log.warn("Principal is null");
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+        
+        log.info("Principal class: {}", principal.getClass().getName());
+        log.info("Authorities: {}", principal.getAuthorities());
+        log.info("Attributes: {}", principal.getAttributes());
+        
+        return ResponseEntity.ok(Map.of(
+            "principalClass", principal.getClass().getName(),
+            "authorities", principal.getAuthorities(),
+            "attributes", principal.getAttributes(),
+            "hasManagerRole", principal.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_MANAGER")),
+            "allAuthorities", principal.getAuthorities().stream()
+                .map(auth -> auth.getAuthority())
+                .toList()
         ));
     }
 
