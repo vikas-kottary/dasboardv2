@@ -35,4 +35,5 @@ public class ReportDto {
     private RiskDto risk;
     private List<ShowcaseDto> showcases;
     private String summary; // Assuming summary is a simple string, adjust as needed
+    private CommentDto comment;
 }

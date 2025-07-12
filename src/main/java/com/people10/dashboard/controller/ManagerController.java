@@ -3,6 +3,8 @@ package com.people10.dashboard.controller;
 import com.people10.dashboard.dto.ReportDto;
 import com.people10.dashboard.dto.ReportResponseDto;
 import com.people10.dashboard.dto.TeamDashboardRequest;
+import com.people10.dashboard.dto.TeamMappingResponse;
+import com.people10.dashboard.dto.TeamMappingResponse.OpcoInfo;
 import com.people10.dashboard.model.TeamMapping;
 import com.people10.dashboard.repository.TeamMappingRepository;
 import com.people10.dashboard.service.ReportService;
@@ -13,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -54,12 +55,39 @@ public class ManagerController {
     @PostMapping("/summarize")
     public String summarizeReport(@RequestBody TeamDashboardRequest reportText) {
         return summarizeService.summarizeReport(reportText);
+    }    
+    
+    @GetMapping("/team-mappings")
+    public ResponseEntity<List<TeamMappingResponse>> getAllTeamMappings() {
+        List<TeamMapping> teamMappings = teamMappingRepository.findAll();
+        List<TeamMappingResponse> response = teamMappings.stream()
+                .map(this::convertToResponse)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/team-mappings")
-    public ResponseEntity<List<TeamMapping>> getAllTeamMappings() {
-        List<TeamMapping> teamMappings = teamMappingRepository.findAll();
-        return ResponseEntity.ok(teamMappings);
+    @GetMapping("{id}/team-mappings")
+    public ResponseEntity<List<TeamMappingResponse>> getTeamForManager(@PathVariable Long id) {
+        List<TeamMapping> teamMappings = teamMappingRepository.findByManagerId(id);
+        List<TeamMappingResponse> response = teamMappings.stream()
+                .map(this::convertToResponse)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    private TeamMappingResponse convertToResponse(TeamMapping teamMapping) {
+        TeamMappingResponse response = new TeamMappingResponse();
+        OpcoInfo opcoInfo = new OpcoInfo();
+
+        opcoInfo.setId(teamMapping.getOpco().getId());
+        opcoInfo.setName(teamMapping.getOpco().getName());
+
+        response.setId(teamMapping.getId());
+        response.setName(teamMapping.getName());
+        response.setClient(teamMapping.getClient());
+        response.setManagerId(teamMapping.getManager() != null ? teamMapping.getManager().getId() : null);
+        response.setOpco(opcoInfo);
+        return response;
     }
 
     // @PreAuthorize("hasAnyRole('OPCO', 'ADMIN', 'MANAGEMENT')")

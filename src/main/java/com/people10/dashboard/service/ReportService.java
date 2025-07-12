@@ -15,7 +15,9 @@ import com.people10.dashboard.dto.ImprovementDto;
 import com.people10.dashboard.dto.InnovationDto;
 import com.people10.dashboard.dto.MilestoneDto;
 import com.people10.dashboard.dto.NonAdherenceDto;
+import com.people10.dashboard.model.Comment;
 import com.people10.dashboard.model.Report;
+import com.people10.dashboard.model.User;
 import com.people10.dashboard.model.report.Summary;
 import com.people10.dashboard.model.report.Improvement;
 import com.people10.dashboard.model.report.Showcase;
@@ -31,15 +33,17 @@ import com.people10.dashboard.model.report.Innovation;
 import com.people10.dashboard.model.report.Milestone;
 import com.people10.dashboard.model.report.Risk;
 import com.people10.dashboard.repository.ReportRepository;
-import com.people10.dashboard.repository.TeamRepository;
-import com.people10.dashboard.repository.ManagerRepository;
-import com.people10.dashboard.repository.OpcoRepository;
+// import com.people10.dashboard.repository.TeamRepository;
+// import com.people10.dashboard.repository.ManagerRepository;
+// import com.people10.dashboard.repository.OpcoRepository;
 import com.people10.dashboard.repository.MilestoneRepository;
 import com.people10.dashboard.repository.WorkloadVisibilityRepository;
 import com.people10.dashboard.repository.AdequateQualityRepository;
 import com.people10.dashboard.repository.EscalationRepository;
 import com.people10.dashboard.repository.TrainingRepository;
+import com.people10.dashboard.repository.UserRepository;
 import com.people10.dashboard.repository.BillabilityRepository;
+import com.people10.dashboard.repository.CommentRepository;
 import com.people10.dashboard.repository.ImprovementRepository;
 import com.people10.dashboard.repository.NonAdherenceRepository;
 import com.people10.dashboard.repository.TimesheetRepository;
@@ -47,6 +51,7 @@ import com.people10.dashboard.repository.InnovationRepository;
 import com.people10.dashboard.repository.RiskRepository;
 import com.people10.dashboard.repository.ShowcaseRepository;
 import com.people10.dashboard.repository.SummaryRepository;
+import com.people10.dashboard.repository.TeamMappingRepository;
 import com.people10.dashboard.repository.ReportHistoryRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -54,6 +59,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -63,9 +69,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReportService {
     private final ReportRepository reportRepository;
-    private final TeamRepository teamRepository;
-    private final ManagerRepository managerRepository;
-    private final OpcoRepository opcoRepository;
+    // private final TeamRepository teamRepository;
+    // private final ManagerRepository managerRepository;
+    // private final OpcoRepository opcoRepository;
     private final MilestoneRepository milestoneRepository;
     private final WorkloadVisibilityRepository workloadVisibilityRepository;
     private final AdequateQualityRepository adequateQualityRepository;
@@ -80,6 +86,10 @@ public class ReportService {
     private final ShowcaseRepository showcaseRepository;
     private final SummaryRepository summaryRepository;
     private final ReportHistoryRepository reportHistoryRepository;
+    private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final TeamMappingRepository teamMappingRepository;
+
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -100,11 +110,15 @@ public class ReportService {
     public ReportResponseDto createReport(ReportDto dto) {
         // Create and save the main report
         Report report = new Report();
-        report.setTeam(teamRepository.findById(dto.getTeamId()).orElse(null));
-        report.setManager(managerRepository.findById(dto.getManagerId()).orElse(null));
-        report.setOpco(opcoRepository.findById(dto.getOpcoId()).orElse(null));
+        report.setTeamMapping(teamMappingRepository.findById(dto.getTeamId()).orElse(null));
+        report.setManager(userRepository.findById(dto.getManagerId()).orElse(null));
+        report.setOpco(userRepository.findById(dto.getOpcoId()).orElse(null));
         report.setClientName(dto.getClientName());
         report.setProcessStatus("SUBMITTED");
+        report.setOpcoNameSnapshot(userRepository.findById(dto.getOpcoId()).map(User::getName).orElse(null));
+        report.setManagerNameSnapshot(userRepository.findById(dto.getManagerId()).map(User::getName).orElse(null));
+        report.setTeamNameSnapshot(teamMappingRepository.findById(dto.getTeamId())
+                .map(team -> team.getName()).orElse(null));
 
         try {
             report.setStartDate(dto.getStartDate());
@@ -113,7 +127,7 @@ public class ReportService {
             throw new RuntimeException("Invalid date format. Use yyyy-MM-dd", e);
         }
 
-        report.setCreatedAt(LocalDate.now());
+        report.setCreatedAt(LocalDateTime.now());
         Report savedReport = reportRepository.save(report);
 
         if (dto.getSummary() != null) {
@@ -122,6 +136,15 @@ public class ReportService {
             summary.setDetail(dto.getSummary());
             summaryRepository.save(summary);
             savedReport.setSummary(summary);
+        }
+
+        if(dto.getComment() != null) {
+            Comment comment = new Comment();
+            comment.setReport(savedReport);
+            comment.setComment(dto.getComment().getComment());
+            comment.setUser(userRepository.findById(dto.getComment().getUserId()).orElse(null));
+            commentRepository.save(comment);
+            savedReport.getComments().add(comment);
         }
 
         // Process milestones
@@ -294,9 +317,9 @@ public class ReportService {
         }
 
         // Update main report details
-        report.setTeam(teamRepository.findById(dto.getTeamId()).orElse(null));
-        report.setManager(managerRepository.findById(dto.getManagerId()).orElse(null));
-        report.setOpco(opcoRepository.findById(dto.getOpcoId()).orElse(null));
+        report.setTeamMapping(teamMappingRepository.findById(dto.getTeamId()).orElse(null));
+        report.setManager(userRepository.findById(dto.getManagerId()).orElse(null));
+        report.setOpco(userRepository.findById(dto.getOpcoId()).orElse(null));
         report.setClientName(dto.getClientName());
 
         report.setStartDate(dto.getStartDate());
@@ -550,7 +573,7 @@ public class ReportService {
 
         ReportResponseDto dto = new ReportResponseDto();
         //dto.setId(report.getId());
-        dto.setTeamName(report.getTeam() != null ? report.getTeam().getName() : null);
+        dto.setTeamName(report.getTeamMapping() != null ? report.getTeamMapping().getName() : null);
         dto.setManagerName(report.getManager() != null ? report.getManager().getName() : null);
         dto.setOpcoName(report.getOpco() != null ? report.getOpco().getName() : null);
         dto.setClientName(report.getClientName());
@@ -701,6 +724,7 @@ public class ReportService {
             .filter(report -> report.getManager() != null && report.getManager().getId().equals(id))
             .filter(report -> reportStatus == null || reportStatus.isEmpty() || 
                 (report.getProcessStatus() != null && report.getProcessStatus().equalsIgnoreCase(reportStatus)))
+            .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
             .forEach(report -> reportDtos.add(convertToDto(report)));
 
         return reportDtos;
