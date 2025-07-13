@@ -65,10 +65,10 @@ public class ReportController {
         }
     }
 
-    @PreAuthorize("hasRole('OPCO') or hasRole('ADMIN') or hasRole('MANAGEMENT')")
-    @GetMapping("/opco/{id}")
-    public ResponseEntity<List<ReportResponseDto>> getReportsByOpco(@PathVariable Long id) {
-        var reports = reportService.getReportsByOpco(id);
-        return reports != null ? ResponseEntity.ok(reports) : ResponseEntity.notFound().build();
-    }
+    // @PreAuthorize("hasRole('OPCO') or hasRole('ADMIN') or hasRole('MANAGEMENT')")
+    // @GetMapping("/opco/{id}")
+    // public ResponseEntity<List<ReportResponseDto>> getReportsByOpco(@PathVariable Long id) {
+    //     var reports = reportService.getReportsByOpco(id);
+    //     return reports != null ? ResponseEntity.ok(reports) : ResponseEntity.notFound().build();
+    // }
 }

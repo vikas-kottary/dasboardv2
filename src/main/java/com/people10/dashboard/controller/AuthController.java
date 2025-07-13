@@ -43,6 +43,10 @@ public class AuthController {
         }
         var user = userOpt.get();
         
+        if (!user.isActive()) {
+            return ResponseEntity.status(403).body(Map.of("error", "Not authorized, User is Inactive"));
+        }
+
         return ResponseEntity.ok(new UserInfoResponse(
             user.getId(),
             user.getEmail(),

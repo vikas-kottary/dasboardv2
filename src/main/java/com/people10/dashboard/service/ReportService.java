@@ -3,6 +3,7 @@ package com.people10.dashboard.service;
 import com.people10.dashboard.dto.ReportDto;
 import com.people10.dashboard.dto.ReportResponseDto;
 import com.people10.dashboard.dto.ReportStatus;
+import com.people10.dashboard.dto.ReportStatusUpdateDto;
 import com.people10.dashboard.dto.RiskDto;
 import com.people10.dashboard.dto.ShowcaseDto;
 import com.people10.dashboard.dto.TimesheetsDto;
@@ -10,6 +11,8 @@ import com.people10.dashboard.dto.TrainingsDto;
 import com.people10.dashboard.dto.WorkloadVisibilityDto;
 import com.people10.dashboard.dto.AdequateQualityDto;
 import com.people10.dashboard.dto.BillabilityDto;
+import com.people10.dashboard.dto.CommentDto;
+import com.people10.dashboard.dto.CommentResponseDto;
 import com.people10.dashboard.dto.EscalationsDto;
 import com.people10.dashboard.dto.ImprovementDto;
 import com.people10.dashboard.dto.InnovationDto;
@@ -297,7 +300,7 @@ public class ReportService {
             ReportHistory history = new ReportHistory();
             history.setReportId(savedReport.getId());
             history.setChangedBy("Default"); 
-            history.setNewStatus(ReportStatus.SUBMITTED);
+            history.setNewStatus(ReportStatus.SUBMITTED.name());
             history.setComment("New report created");
             reportHistoryRepository.save(history);
         }
@@ -548,7 +551,7 @@ public class ReportService {
             ReportHistory history = new ReportHistory();
             history.setReportId(savedReport.getId());
             history.setChangedBy("Default"); 
-            history.setNewStatus(ReportStatus.SUBMITTED);
+            history.setNewStatus(ReportStatus.SUBMITTED.name());
             history.setComment("Report updated");
             reportHistoryRepository.save(history);
         }
@@ -579,6 +582,18 @@ public class ReportService {
 
         dto.setSummary(report.getSummary() != null ? report.getSummary().getDetail() : null);
         
+        dto.setStatus(report.getProcessStatus());
+        dto.setReportId(report.getId());
+        if (report.getComments() != null) {
+            report.getComments().forEach(comment -> {
+            CommentResponseDto commentDto = new CommentResponseDto();
+            commentDto.setCreatedAt(comment.getCreatedAt());
+            commentDto.setComment(comment.getComment());
+            commentDto.setCommentedBy(comment.getUser().getName());
+            dto.getComments().add(commentDto);
+        });
+        }
+      
         // Milestones
         if (report.getMilestones() != null) {
             List<MilestoneDto> milestoneDtos = new ArrayList<>();
@@ -703,16 +718,6 @@ public class ReportService {
         return dto;
     }
 
-    public List<ReportResponseDto> getReportsByOpco(Long id) {
-        List<ReportResponseDto> reportDtos = new ArrayList<>();
-
-        reportRepository.findAll().stream()
-            .filter(report -> report.getOpco() != null && report.getOpco().getId().equals(id))
-            .forEach(report -> reportDtos.add(convertToDto(report)));
-
-        return reportDtos;
-    }
-
     public List<ReportResponseDto> getReportsByManager(Long id, String reportStatus) {
         List<ReportResponseDto> reportDtos = new ArrayList<>();
 
@@ -724,6 +729,44 @@ public class ReportService {
             .forEach(report -> reportDtos.add(convertToDto(report)));
 
         return reportDtos;
+    }
+
+    public List<ReportResponseDto> getReportsByOpco(Long id, String reportStatus) {
+        List<ReportResponseDto> reportDtos = new ArrayList<>();
+
+        reportRepository.findAll().stream()
+            .filter(report -> report.getOpco() != null && report.getOpco().getId().equals(id))
+            .filter(report -> reportStatus == null || reportStatus.isEmpty() || 
+                (report.getProcessStatus() != null && report.getProcessStatus().equalsIgnoreCase(reportStatus)))
+            .forEach(report -> reportDtos.add(convertToDto(report)));
+
+        return reportDtos;
+    }
+
+    public void updateReportStatus(ReportStatusUpdateDto reportStatusUpdateDto) {
+        Report report = reportRepository.findById(reportStatusUpdateDto.getReportId()).orElse(null);
+        if (report != null) {
+            report.setProcessStatus(reportStatusUpdateDto.getNewStatus());
+            
+            ReportHistory history = new ReportHistory();
+            history.setReportId(report.getId());
+            history.setNewStatus(reportStatusUpdateDto.getNewStatus());
+            history.setPreviousStatus(report.getProcessStatus());
+            history.setChangedBy(userRepository.findById(reportStatusUpdateDto.getUserId()).orElse(null).getName());
+            history.setComment(reportStatusUpdateDto.getComment());
+            history.setChangedAt(LocalDateTime.now());
+            history.setComment(reportStatusUpdateDto.getComment());
+            reportHistoryRepository.save(history);
+
+            Comment comment = new Comment();
+            comment.setReport(report);
+            comment.setComment(reportStatusUpdateDto.getComment());
+            comment.setUser(userRepository.findById(reportStatusUpdateDto.getUserId()).orElse(null));
+            commentRepository.save(comment);
+
+            report.getComments().add(comment);
+            reportRepository.save(report);
+        }
     }
 
 }

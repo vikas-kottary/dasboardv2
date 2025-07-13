@@ -66,16 +66,18 @@ public class ManagerController {
     public ResponseEntity<List<TeamMappingResponse>> getAllTeamMappings() {
         List<TeamMapping> teamMappings = teamMappingRepository.findAll();
         List<TeamMappingResponse> response = teamMappings.stream()
+                .filter(tm -> tm.isActive())    
                 .map(this::convertToResponse)
                 .toList();
         return ResponseEntity.ok(response);
     }
 
-   // @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("{id}/team-mappings")
     public ResponseEntity<List<TeamMappingResponse>> getTeamForManager(@PathVariable Long id) {
         List<TeamMapping> teamMappings = teamMappingRepository.findByManagerId(id);
         List<TeamMappingResponse> response = teamMappings.stream()
+                .filter(tm -> tm.isActive())    
                 .map(this::convertToResponse)
                 .toList();
         return ResponseEntity.ok(response);

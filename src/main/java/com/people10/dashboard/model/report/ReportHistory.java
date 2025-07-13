@@ -30,13 +30,11 @@ public class ReportHistory {
     @Column(name = "changed_by", nullable = false)
     private String changedBy;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "previous_status")
-    private ReportStatus previousStatus;
+    private String previousStatus;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "new_status", nullable = false)
-    private ReportStatus newStatus;
+    private String newStatus;
 
     @Column(name = "comment", length = 1000)
     private String comment;

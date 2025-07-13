@@ -59,6 +59,13 @@ public class CustomOidcUserService extends OidcUserService {
         log.info("Found user: {} with role: {}", user.getName(), 
                 user.getRole() != null ? user.getRole().getName() : "NO_ROLE");
         
+
+        if (!user.isActive()) {
+            log.warn("User is inactive: {}", email);
+            throw new OAuth2AuthenticationException("User is inactive");
+        }
+        
+
         // Create authorities from user roles
         Set<GrantedAuthority> authorities = new HashSet<>(oidcUser.getAuthorities());
         

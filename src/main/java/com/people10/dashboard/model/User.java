@@ -19,6 +19,9 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "is_active")
+    private boolean isActive;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;

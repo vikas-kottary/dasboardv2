@@ -24,6 +24,9 @@ public class TeamMapping {
     @Column(nullable = false, length = 100)
     private String client;
 
+    @Column(name = "is_active")
+    private boolean isActive;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "manager_id", nullable = false)
     private User manager;
