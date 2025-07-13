@@ -4,12 +4,15 @@ package com.people10.dashboard.controller;
 // import com.people10.dashboard.model.Manager;
 // import com.people10.dashboard.model.Team;
 import com.people10.dashboard.model.User;
+import com.people10.dashboard.model.Role;
 import com.people10.dashboard.model.TeamMapping;
 import com.people10.dashboard.repository.UserRepository;
+import com.people10.dashboard.repository.RoleRepository;
 import com.people10.dashboard.repository.TeamMappingRepository;
 import com.people10.dashboard.dto.AdminReportResponseMeta;
 import com.people10.dashboard.dto.AdminTeamMappingResponse;
 import com.people10.dashboard.dto.ReportResponseDto;
+import com.people10.dashboard.dto.RoleDto;
 import com.people10.dashboard.dto.TeamMappingResponse;
 import com.people10.dashboard.dto.TeamRequestDto;
 import com.people10.dashboard.dto.UserRequestDto;
@@ -36,6 +39,7 @@ public class AdminController {
     private final AdminService adminService;
     private final TeamMappingService teamMappingService;
     private final ReportService reportService;
+    private final RoleRepository roleRepository;
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/users")
@@ -86,6 +90,15 @@ public class AdminController {
                 .map(teamMappingService::convertToResponse)
                 .toList());
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping("/roles")
+    public ResponseEntity<List<RoleDto>> getRoles() {
+        return ResponseEntity.ok(roleRepository.findAll().stream()
+                .map(role -> new RoleDto(role.getId(), role.getName()))
+                .toList());
+    }
+    
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/team-mappings")
