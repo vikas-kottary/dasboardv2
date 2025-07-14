@@ -125,14 +125,14 @@ public class AdminController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
    
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT')")
     @GetMapping("/reports/meta")
     public ResponseEntity<AdminReportResponseMeta> getReportsMeta() {
         AdminReportResponseMeta responseMeta = adminService.getReportsMeta();
         return ResponseEntity.ok(responseMeta);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT')")
     @GetMapping("/reports/{id}")
     public ResponseEntity<ReportResponseDto> getReport(@PathVariable Long id) {
         ReportResponseDto report = reportService.getReport(id);
