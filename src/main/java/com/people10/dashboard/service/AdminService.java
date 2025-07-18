@@ -78,6 +78,7 @@ public class AdminService {
     public AdminReportResponseMeta getReportsMeta() {
         Map<String, List<ReportMetaDto>> reports = reportRepository.findAll()
                 .stream()
+                .filter(report -> "OPCO_APPROVED".equalsIgnoreCase(report.getProcessStatus()))
                 .collect(groupingBy(
                     report -> report.getStartDate() + "-" + report.getEndDate(),
                     mapping(this::mapToReportMetaDto, toList())
@@ -95,7 +96,13 @@ public class AdminService {
         metaDto.setManagerName(report.getManagerNameSnapshot());
         metaDto.setOpcoName(report.getOpcoNameSnapshot());
         metaDto.setProcessStatus(report.getProcessStatus());
-        metaDto.setSummary(report.getSummary().getDetail());
+        if (report.getSummary() != null) {
+            metaDto.setDetailedSummary(report.getSummary().getDetail());
+            metaDto.setBriefSummary(report.getSummary().getBrief());
+        } else {
+            metaDto.setDetailedSummary(null);
+            metaDto.setBriefSummary(null);
+        }
         metaDto.setTeamName(report.getTeamNameSnapshot());
         return metaDto;
     }

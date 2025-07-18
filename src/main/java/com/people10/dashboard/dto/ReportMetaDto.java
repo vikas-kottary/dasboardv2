@@ -10,5 +10,6 @@ public class ReportMetaDto {
     private String managerName;
     private String opcoName;
     private String processStatus;
-    private String summary;
+    private String briefSummary;
+    private String detailedSummary;
 }

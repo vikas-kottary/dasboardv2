@@ -24,7 +24,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         log.info("Configuring security filter chain");
-      //  log.info("CustomOAuth2UserService instance: {}", customOAuth2UserService);
         log.info("CustomOidcUserService instance: {}", customOidcUserService);
         
         http
@@ -39,12 +38,11 @@ public class SecurityConfig {
                     return corsConfig;
             }))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers( "/login**", "/error**", "/api/auth/logout").permitAll()
+                .requestMatchers( "/login**", "/error**", "/api/auth/logout", "/api/v1/summarize").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
-                    //.userService(customOAuth2UserService)
                     .oidcUserService(customOidcUserService)
                 )
                 .defaultSuccessUrl("http://localhost:3000/auth/callback", true)

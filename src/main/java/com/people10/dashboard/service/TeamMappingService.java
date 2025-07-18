@@ -32,6 +32,7 @@ public class TeamMappingService {
                 .manager(managerOpt.get())
                 .opco(opcoOpt.get())
                 .isActive(true)
+                .skipOpcoApproval(teamRequestDto.isSkipOpcoApproval())
                 .build();
 
         return Optional.of(teamMappingRepository.save(teamMapping))
@@ -43,7 +44,7 @@ public class TeamMappingService {
                 .map(existingTeamMapping -> {
                     existingTeamMapping.setName(teamRequestDto.getName());
                     existingTeamMapping.setClient(teamRequestDto.getClient());
-                    
+                    existingTeamMapping.setSkipOpcoApproval(teamRequestDto.isSkipOpcoApproval());
                     var managerOpt = userRepository.findById(teamRequestDto.getManagerId());
                     var opcoOpt = userRepository.findById(teamRequestDto.getOpcoId());
                     
@@ -84,6 +85,7 @@ public class TeamMappingService {
         response.setManager(managerInfo);
         response.setOpco(opcoInfo);
         response.setActive(teamMapping.isActive());
+        response.setSkipOpcoApproval(teamMapping.isSkipOpcoApproval());
         return response;
     }
 }

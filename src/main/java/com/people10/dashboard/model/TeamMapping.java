@@ -27,6 +27,9 @@ public class TeamMapping {
     @Column(name = "is_active")
     private boolean isActive;
 
+    @Column(name = "skip_opco_approval")
+    private boolean skipOpcoApproval;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "manager_id", nullable = false)
     private User manager;

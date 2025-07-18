@@ -1,5 +1,6 @@
 package com.people10.dashboard.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
 
@@ -33,4 +34,5 @@ public class TeamDashboardRequest {
     private InnovationDto innovation;
     private RiskDto risk;
     private List<ShowcaseDto> showcases;
+    private List<CommentDto> comments = new ArrayList<>();
 }

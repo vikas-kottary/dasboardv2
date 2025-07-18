@@ -2,6 +2,7 @@ package com.people10.dashboard.controller;
 
 import com.people10.dashboard.dto.ReportDto;
 import com.people10.dashboard.dto.ReportResponseDto;
+import com.people10.dashboard.dto.SummaryResponseDto;
 import com.people10.dashboard.dto.TeamDashboardRequest;
 import com.people10.dashboard.dto.TeamMappingResponse;
 import com.people10.dashboard.dto.TeamMappingResponse.OpcoInfo;
@@ -57,7 +58,7 @@ public class ManagerController {
     }
     
     @PostMapping("/summarize")
-    public String summarizeReport(@RequestBody TeamDashboardRequest reportText) {
+    public SummaryResponseDto summarizeReport(@RequestBody TeamDashboardRequest reportText) {
         return summarizeService.summarizeReport(reportText);
     }    
     

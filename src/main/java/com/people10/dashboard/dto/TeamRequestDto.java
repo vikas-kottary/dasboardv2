@@ -14,5 +14,6 @@ public class TeamRequestDto {
     private Long managerId;
     @NotNull(message = "Opco ID is required")
     private Long opcoId;
+    private boolean skipOpcoApproval;
 
 }

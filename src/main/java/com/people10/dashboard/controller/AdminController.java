@@ -66,12 +66,12 @@ public class AdminController {
     }
 
         
-    @PutMapping("/users/{userId}/role")
-    public ResponseEntity<UserResponseDto> setUserRole(@PathVariable Long userId, @RequestParam String roleName) {
-        return adminService.setUserRole(userId, roleName)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+    // @PutMapping("/users/{userId}/role")
+    // public ResponseEntity<UserResponseDto> setUserRole(@PathVariable Long userId, @RequestParam String roleName) {
+    //     return adminService.setUserRole(userId, roleName)
+    //             .map(ResponseEntity::ok)
+    //             .orElseGet(() -> ResponseEntity.notFound().build());
+    // }
 
     //api to inactivate / activate the user
     @PreAuthorize("hasAnyRole('ADMIN')")

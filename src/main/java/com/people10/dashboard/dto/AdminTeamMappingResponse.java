@@ -15,6 +15,7 @@ public class AdminTeamMappingResponse {
     private ManagerInfo manager;
     private OpcoInfo opco;
     private boolean isActive;
+    private boolean skipOpcoApproval;
     
     @Data
     @NoArgsConstructor

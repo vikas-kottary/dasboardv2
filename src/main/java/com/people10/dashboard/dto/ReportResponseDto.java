@@ -2,6 +2,9 @@ package com.people10.dashboard.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.stringtemplate.v4.compiler.CodeGenerator.primary_return;
+
 import java.time.LocalDate;
 
 import lombok.Data;
@@ -34,7 +37,8 @@ public class ReportResponseDto {
     private InnovationDto innovation;
     private RiskDto risk;
     private List<ShowcaseDto> showcases= new ArrayList<>();
-    private String summary; 
+    private String briefSummary;
+    private String detailedSummary; 
 
     private String status;
     private Long reportId;
