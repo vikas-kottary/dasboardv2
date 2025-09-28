@@ -12,7 +12,7 @@ stages:
 
 cache:
   paths:
-    - .m2/repository
+    - /root/.m2/repository
 
 maven build:
   image: maven:3.9.4-eclipse-temurin-21-alpine
