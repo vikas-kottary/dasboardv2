@@ -1,0 +1,25 @@
+
+spec:
+  inputs:
+    java-version:
+      default: 17
+      options: ['8', '17', '21']
+    depoloy-environment:
+      default: dev
+      options: ['dev', 'production']
+
+stages:
+  - mvn-build
+
+cache:
+  paths:
+    - .m2/repository
+
+maven build:
+  image: maven:3.8.3-openjdk-17
+  stage: mvn-build
+  script:
+    - mvn clean install
+  when: manual
+
+
