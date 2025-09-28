@@ -18,5 +18,8 @@ maven build:
   image: maven:3.9.4-eclipse-temurin-21-alpine
   stage: mvn-build
   script:
-    - mvn clean install
+    - mvn -Dmaven.repo.local=.m2/repository clean install
+  cache:
+    paths:
+      - .m2/repository
   when: manual
