@@ -2,6 +2,8 @@ package com.people10.dashboard.service;
 
 import com.people10.dashboard.dto.ReportDto;
 import com.people10.dashboard.dto.ReportResponseDto;
+import com.people10.dashboard.dto.ReportStatus;
+import com.people10.dashboard.dto.ReportStatusUpdateDto;
 import com.people10.dashboard.dto.RiskDto;
 import com.people10.dashboard.dto.ShowcaseDto;
 import com.people10.dashboard.dto.TimesheetsDto;
@@ -9,12 +11,17 @@ import com.people10.dashboard.dto.TrainingsDto;
 import com.people10.dashboard.dto.WorkloadVisibilityDto;
 import com.people10.dashboard.dto.AdequateQualityDto;
 import com.people10.dashboard.dto.BillabilityDto;
+import com.people10.dashboard.dto.CommentDto;
+import com.people10.dashboard.dto.CommentResponseDto;
 import com.people10.dashboard.dto.EscalationsDto;
 import com.people10.dashboard.dto.ImprovementDto;
 import com.people10.dashboard.dto.InnovationDto;
 import com.people10.dashboard.dto.MilestoneDto;
 import com.people10.dashboard.dto.NonAdherenceDto;
+import com.people10.dashboard.model.Comment;
 import com.people10.dashboard.model.Report;
+import com.people10.dashboard.model.TeamMapping;
+import com.people10.dashboard.model.User;
 import com.people10.dashboard.model.report.Summary;
 import com.people10.dashboard.model.report.Improvement;
 import com.people10.dashboard.model.report.Showcase;
@@ -24,20 +31,23 @@ import com.people10.dashboard.model.report.Escalation;
 import com.people10.dashboard.model.report.Training;
 import com.people10.dashboard.model.report.Billability;
 import com.people10.dashboard.model.report.NonAdherence;
+import com.people10.dashboard.model.report.ReportHistory;
 import com.people10.dashboard.model.report.Timesheet;
 import com.people10.dashboard.model.report.Innovation;
 import com.people10.dashboard.model.report.Milestone;
 import com.people10.dashboard.model.report.Risk;
 import com.people10.dashboard.repository.ReportRepository;
-import com.people10.dashboard.repository.TeamRepository;
-import com.people10.dashboard.repository.ManagerRepository;
-import com.people10.dashboard.repository.OpcoRepository;
+// import com.people10.dashboard.repository.TeamRepository;
+// import com.people10.dashboard.repository.ManagerRepository;
+// import com.people10.dashboard.repository.OpcoRepository;
 import com.people10.dashboard.repository.MilestoneRepository;
 import com.people10.dashboard.repository.WorkloadVisibilityRepository;
 import com.people10.dashboard.repository.AdequateQualityRepository;
 import com.people10.dashboard.repository.EscalationRepository;
 import com.people10.dashboard.repository.TrainingRepository;
+import com.people10.dashboard.repository.UserRepository;
 import com.people10.dashboard.repository.BillabilityRepository;
+import com.people10.dashboard.repository.CommentRepository;
 import com.people10.dashboard.repository.ImprovementRepository;
 import com.people10.dashboard.repository.NonAdherenceRepository;
 import com.people10.dashboard.repository.TimesheetRepository;
@@ -45,12 +55,14 @@ import com.people10.dashboard.repository.InnovationRepository;
 import com.people10.dashboard.repository.RiskRepository;
 import com.people10.dashboard.repository.ShowcaseRepository;
 import com.people10.dashboard.repository.SummaryRepository;
+import com.people10.dashboard.repository.TeamMappingRepository;
+import com.people10.dashboard.repository.ReportHistoryRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -60,9 +72,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReportService {
     private final ReportRepository reportRepository;
-    private final TeamRepository teamRepository;
-    private final ManagerRepository managerRepository;
-    private final OpcoRepository opcoRepository;
     private final MilestoneRepository milestoneRepository;
     private final WorkloadVisibilityRepository workloadVisibilityRepository;
     private final AdequateQualityRepository adequateQualityRepository;
@@ -76,6 +85,11 @@ public class ReportService {
     private final RiskRepository riskRepository;
     private final ShowcaseRepository showcaseRepository;
     private final SummaryRepository summaryRepository;
+    private final ReportHistoryRepository reportHistoryRepository;
+    private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final TeamMappingRepository teamMappingRepository;
+
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -94,12 +108,26 @@ public class ReportService {
 
     @Transactional
     public ReportResponseDto createReport(ReportDto dto) {
+
+        TeamMapping team = teamMappingRepository.findById(dto.getTeamId())
+                .orElseThrow(() -> new RuntimeException("Team not found with ID: " + dto.getTeamId()));
+
         // Create and save the main report
         Report report = new Report();
-        report.setTeam(teamRepository.findById(dto.getTeamId()).orElse(null));
-        report.setManager(managerRepository.findById(dto.getManagerId()).orElse(null));
-        report.setOpco(opcoRepository.findById(dto.getOpcoId()).orElse(null));
+        report.setTeamMapping(team);
+        report.setManager(userRepository.findById(dto.getManagerId()).orElse(null));
+        report.setOpco(userRepository.findById(dto.getOpcoId()).orElse(null));
         report.setClientName(dto.getClientName());
+
+        if(team.isSkipOpcoApproval()) {
+            report.setProcessStatus("OPCO_APPROVED");
+        } else {
+            report.setProcessStatus("SUBMITTED");   
+        }        
+        
+        report.setOpcoNameSnapshot(userRepository.findById(dto.getOpcoId()).map(User::getName).orElse(null));
+        report.setManagerNameSnapshot(userRepository.findById(dto.getManagerId()).map(User::getName).orElse(null));
+        report.setTeamNameSnapshot(team.getName());
 
         try {
             report.setStartDate(dto.getStartDate());
@@ -108,15 +136,25 @@ public class ReportService {
             throw new RuntimeException("Invalid date format. Use yyyy-MM-dd", e);
         }
 
-        report.setCreatedAt(LocalDate.now());
+        report.setCreatedAt(LocalDateTime.now());
         Report savedReport = reportRepository.save(report);
 
-        if (dto.getSummary() != null) {
+        if (dto.getBriefSummary() != null) {
             Summary summary = new Summary();
             summary.setReport(savedReport);
-            summary.setDetail(dto.getSummary());
+            summary.setDetail(dto.getDetailedSummary());
+            summary.setBrief(dto.getBriefSummary());
             summaryRepository.save(summary);
             savedReport.setSummary(summary);
+        }
+
+        if(dto.getComment() != null && dto.getComment().getComment() != null) {
+            Comment comment = new Comment();
+            comment.setReport(savedReport);
+            comment.setComment(dto.getComment().getComment());
+            comment.setUser(userRepository.findById(dto.getComment().getUserId()).orElse(null));
+            commentRepository.save(comment);
+            savedReport.getComments().add(comment);
         }
 
         // Process milestones
@@ -259,6 +297,9 @@ public class ReportService {
         if (dto.getShowcases() != null) {
             List<Showcase> showcases = new ArrayList<>();
             for (ShowcaseDto showcaseDto : dto.getShowcases()) {
+                if (showcaseDto.getDetail() == null || showcaseDto.getDetail().isEmpty()) {
+                    continue; // Skip showcases with no detail
+                }
                 Showcase showcase = new Showcase();
                 showcase.setReport(savedReport);
                 showcase.setSequenceNo(showcaseDto.getSequenceNo());
@@ -269,249 +310,272 @@ public class ReportService {
             savedReport.setShowcases(showcases);
         }
 
-        return convertToDto(savedReport);
-    }
-
-    @Transactional
-    public ReportResponseDto updateReport(Long id, ReportDto dto) {
-        Report report = reportRepository.findById(id).orElse(null);
-        if (report == null) {
-            throw new RuntimeException("Report not found with id: " + id);
-        }
-
-        // Update main report details
-        report.setTeam(teamRepository.findById(dto.getTeamId()).orElse(null));
-        report.setManager(managerRepository.findById(dto.getManagerId()).orElse(null));
-        report.setOpco(opcoRepository.findById(dto.getOpcoId()).orElse(null));
-        report.setClientName(dto.getClientName());
-
-        report.setStartDate(dto.getStartDate());
-        report.setEndDate(dto.getEndDate());
-
-        // Clear existing related entities
-        if (report.getMilestones() != null) {
-            milestoneRepository.deleteAll(report.getMilestones());
-            report.getMilestones().clear();
-        }
-
-        if (report.getImprovements() != null) {
-            improvementRepository.deleteAll(report.getImprovements());
-            report.getImprovements().clear();
-        }
-
-        if (report.getShowcases() != null) {
-            showcaseRepository.deleteAll(report.getShowcases());
-            report.getShowcases().clear();
-        }
-
-        if (report.getWorkloadVisibility() != null) {
-            workloadVisibilityRepository.delete(report.getWorkloadVisibility());
-            report.setWorkloadVisibility(null);
-        }
-
-        if (report.getAdequateQuality() != null) {
-            adequateQualityRepository.delete(report.getAdequateQuality());
-            report.setAdequateQuality(null);
-        }
-
-        if (report.getEscalation() != null) {
-            escalationRepository.delete(report.getEscalation());
-            report.setEscalation(null);
-        }
-
-        if (report.getTraining() != null) {
-            trainingRepository.delete(report.getTraining());
-            report.setTraining(null);
-        }
-
-        if (report.getBillability() != null) {
-            billabilityRepository.delete(report.getBillability());
-            report.setBillability(null);
-        }
-
-        if (report.getNonAdherence() != null) {
-            nonAdherenceRepository.delete(report.getNonAdherence());
-            report.setNonAdherence(null);
-        }
-
-        if (report.getTimesheet() != null) {
-            timesheetRepository.delete(report.getTimesheet());
-            report.setTimesheet(null);
-        }
-
-        if (report.getInnovation() != null) {
-            innovationRepository.delete(report.getInnovation());
-            report.setInnovation(null);
-        }
-
-        if (report.getRisk() != null) {
-            riskRepository.delete(report.getRisk());
-            report.setRisk(null);
-        }
-
-        Report savedReport = reportRepository.save(report);
-
-        if (dto.getSummary() != null) {
-            Summary summary = new Summary();
-            summary.setReport(savedReport);
-            summary.setDetail(dto.getSummary());
-            summaryRepository.save(summary);
-            savedReport.setSummary(summary);
-        }
-
-        // Create new related entities (same as create method)
-        // Process milestones
-        if (dto.getMilestones() != null) {
-            List<Milestone> milestones = new ArrayList<>();
-            for (MilestoneDto milestoneDto : dto.getMilestones()) {
-                Milestone milestone = new Milestone();
-                milestone.setReport(savedReport);
-                milestone.setSequenceNo(milestoneDto.getSequenceNo());
-                milestone.setProjectName(milestoneDto.getProjectName());
-                milestone.setDetail(milestoneDto.getDetail());
-                milestone.setMilestoneDate(milestoneDto.getMilestoneDate());
-                milestone.setRagStatusId(milestoneDto.getRagStatusId());
-                milestones.add(milestone);
+        if (savedReport != null) {
+            ReportHistory history = new ReportHistory();
+            history.setReportId(savedReport.getId());
+            history.setChangedBy("Default"); 
+            if(team.isSkipOpcoApproval()) {
+                history.setNewStatus(ReportStatus.OPCO_APPROVED.name());
+            } else {
+                history.setNewStatus(ReportStatus.SUBMITTED.name());
             }
-            milestoneRepository.saveAll(milestones);
-            savedReport.setMilestones(milestones);
-        }
-
-        // Process workload visibility
-        if (dto.getWorkloadVisibility() != null) {
-            WorkloadVisibility workloadVisibility = new WorkloadVisibility();
-            workloadVisibility.setReport(savedReport);
-            workloadVisibility.setValue(dto.getWorkloadVisibility().getValue());
-            workloadVisibility.setRagStatusId(dto.getWorkloadVisibility().getRagStatusId());
-            workloadVisibilityRepository.save(workloadVisibility);
-            savedReport.setWorkloadVisibility(workloadVisibility);
-        }
-
-        // Process adequate quality
-        if (dto.getAdequateQuality() != null) {
-            AdequateQuality adequateQuality = new AdequateQuality();
-            adequateQuality.setReport(savedReport);
-            adequateQuality.setValue(dto.getAdequateQuality().getValue());
-            adequateQuality.setRagStatusId(dto.getAdequateQuality().getRagStatusId());
-            adequateQualityRepository.save(adequateQuality);
-            savedReport.setAdequateQuality(adequateQuality);
-        }
-
-        // Process escalations
-        if (dto.getEscalations() != null) {
-            Escalation escalation = new Escalation();
-            escalation.setReport(savedReport);
-            escalation.setHasEscalation(dto.getEscalations().isHasEscalation());
-            escalation.setDetails(dto.getEscalations().getDetails());
-            escalation.setRagStatusId(dto.getEscalations().getRagStatusId());
-            escalationRepository.save(escalation);
-            savedReport.setEscalation(escalation);
-        }
-
-        // Process trainings
-        if (dto.getTrainings() != null) {
-            Training training = new Training();
-            training.setReport(savedReport);
-            training.setTrainingDetails(dto.getTrainings().getTrainingDetails());
-            training.setTotalHours((float) dto.getTrainings().getTotalHours());
-            training.setRagStatusId(dto.getTrainings().getRagStatusId());
-            trainingRepository.save(training);
-            savedReport.setTraining(training);
-        }
-
-        // Process billability
-        if (dto.getBillability() != null) {
-            Billability billability = new Billability();
-            billability.setReport(savedReport);
-            billability.setBilledResources(dto.getBillability().getBilledResources());
-            billability.setUnbilledResources(dto.getBillability().getUnbilledResources());
-            billability.setLeavesBilled(dto.getBillability().getLeavesBilled());
-            billability.setLeavesUnbilled(dto.getBillability().getLeavesUnbilled());
-            billability.setHolidays(dto.getBillability().getHolidays());
-            billability.setOverallBillabilityPercent(dto.getBillability().getOverallBillabilityPercent());
-            billability.setRagStatusId(dto.getBillability().getRagStatusId());
-            billabilityRepository.save(billability);
-            savedReport.setBillability(billability);
-        }
-
-        // Process improvements
-        if (dto.getImprovements() != null) {
-            List<Improvement> improvements = new ArrayList<>();
-            for (ImprovementDto improvementDto : dto.getImprovements()) {
-                Improvement improvement = new Improvement();
-                improvement.setReport(savedReport);
-                improvement.setSequenceNo(improvementDto.getSequenceNo());
-                improvement.setArea(improvementDto.getArea());
-                improvement.setValueAddition(improvementDto.getValueAddition());
-                improvement.setRagStatusId(improvementDto.getRagStatusId());
-                improvements.add(improvement);
-            }
-            improvementRepository.saveAll(improvements);
-            savedReport.setImprovements(improvements);
-        }
-
-        // Process non-adherence
-        if (dto.getNonAdherence() != null) {
-            NonAdherence nonAdherence = new NonAdherence();
-            nonAdherence.setReport(savedReport);
-            nonAdherence.setNonAdherenceValue(dto.getNonAdherence().getNonAdherenceValue());
-            nonAdherence.setCount(dto.getNonAdherence().getCount());
-            nonAdherence.setImpact(dto.getNonAdherence().getImpact());
-            nonAdherence.setTimeToResolve(dto.getNonAdherence().getTimeToResolve());
-            nonAdherence.setRagStatusId(dto.getNonAdherence().getRagStatusId());
-            nonAdherenceRepository.save(nonAdherence);
-            savedReport.setNonAdherence(nonAdherence);
-        }
-
-        // Process timesheets
-        if (dto.getTimesheets() != null) {
-            Timesheet timesheet = new Timesheet();
-            timesheet.setReport(savedReport);
-            timesheet.setClientDefaulters(dto.getTimesheets().getClientDefaulters());
-            timesheet.setErpDefaulters(dto.getTimesheets().getErpDefaulters());
-            timesheet.setRagStatusId(dto.getTimesheets().getRagStatusId());
-            timesheetRepository.save(timesheet);
-            savedReport.setTimesheet(timesheet);
-        }
-
-        // Process innovation
-        if (dto.getInnovation() != null) {
-            Innovation innovation = new Innovation();
-            innovation.setReport(savedReport);
-            innovation.setDetails(dto.getInnovation().getDetails());
-            innovation.setValueAdded(dto.getInnovation().getValueAdded());
-            innovation.setRagStatusId(dto.getInnovation().getRagStatusId());
-            innovationRepository.save(innovation);
-            savedReport.setInnovation(innovation);
-        }
-
-        // Process risk
-        if (dto.getRisk() != null) {
-            Risk risk = new Risk();
-            risk.setReport(savedReport);
-            risk.setRiskValue(dto.getRisk().getRiskValue());
-            risk.setDetails(dto.getRisk().getDetails());
-            risk.setRagStatusId(dto.getRisk().getRagStatusId());
-            riskRepository.save(risk);
-            savedReport.setRisk(risk);
-        }
-
-        // Process showcases
-        if (dto.getShowcases() != null) {
-            List<Showcase> showcases = new ArrayList<>();
-            for (ShowcaseDto showcaseDto : dto.getShowcases()) {
-                Showcase showcase = new Showcase();
-                showcase.setReport(savedReport);
-                showcase.setSequenceNo(showcaseDto.getSequenceNo());
-                showcase.setDetail(showcaseDto.getDetail());
-                showcases.add(showcase);
-            }
-            showcaseRepository.saveAll(showcases);
-            savedReport.setShowcases(showcases);
+            history.setComment("New report created");
+            reportHistoryRepository.save(history);
         }
 
         return convertToDto(savedReport);
     }
+
+    // @Transactional
+    // public ReportResponseDto updateReport(Long id, ReportDto dto) {
+    //     Report report = reportRepository.findById(id).orElse(null);
+    //     if (report == null) {
+    //         throw new RuntimeException("Report not found with id: " + id);
+    //     }
+
+    //     // Update main report details
+    //     report.setTeamMapping(teamMappingRepository.findById(dto.getTeamId()).orElse(null));
+    //     report.setManager(userRepository.findById(dto.getManagerId()).orElse(null));
+    //     report.setOpco(userRepository.findById(dto.getOpcoId()).orElse(null));
+    //     report.setClientName(dto.getClientName());
+
+    //     report.setStartDate(dto.getStartDate());
+    //     report.setEndDate(dto.getEndDate());
+
+    //     // Clear existing related entities
+    //     if (report.getMilestones() != null) {
+    //         milestoneRepository.deleteAll(report.getMilestones());
+    //         report.getMilestones().clear();
+    //     }
+
+    //     if (report.getImprovements() != null) {
+    //         improvementRepository.deleteAll(report.getImprovements());
+    //         report.getImprovements().clear();
+    //     }
+
+    //     if (report.getShowcases() != null) {
+    //         showcaseRepository.deleteAll(report.getShowcases());
+    //         report.getShowcases().clear();
+    //     }
+
+    //     if (report.getWorkloadVisibility() != null) {
+    //         workloadVisibilityRepository.delete(report.getWorkloadVisibility());
+    //         report.setWorkloadVisibility(null);
+    //     }
+
+    //     if (report.getAdequateQuality() != null) {
+    //         adequateQualityRepository.delete(report.getAdequateQuality());
+    //         report.setAdequateQuality(null);
+    //     }
+
+    //     if (report.getEscalation() != null) {
+    //         escalationRepository.delete(report.getEscalation());
+    //         report.setEscalation(null);
+    //     }
+
+    //     if (report.getTraining() != null) {
+    //         trainingRepository.delete(report.getTraining());
+    //         report.setTraining(null);
+    //     }
+
+    //     if (report.getBillability() != null) {
+    //         billabilityRepository.delete(report.getBillability());
+    //         report.setBillability(null);
+    //     }
+
+    //     if (report.getNonAdherence() != null) {
+    //         nonAdherenceRepository.delete(report.getNonAdherence());
+    //         report.setNonAdherence(null);
+    //     }
+
+    //     if (report.getTimesheet() != null) {
+    //         timesheetRepository.delete(report.getTimesheet());
+    //         report.setTimesheet(null);
+    //     }
+
+    //     if (report.getInnovation() != null) {
+    //         innovationRepository.delete(report.getInnovation());
+    //         report.setInnovation(null);
+    //     }
+
+    //     if (report.getRisk() != null) {
+    //         riskRepository.delete(report.getRisk());
+    //         report.setRisk(null);
+    //     }
+
+    //     Report savedReport = reportRepository.save(report);
+
+    //     if (dto.getSummary() != null) {
+    //         Summary summary = new Summary();
+    //         summary.setReport(savedReport);
+    //         summary.setDetail(dto.getSummary());
+    //         summaryRepository.save(summary);
+    //         savedReport.setSummary(summary);
+    //     }
+
+    //     // Create new related entities (same as create method)
+    //     // Process milestones
+    //     if (dto.getMilestones() != null) {
+    //         List<Milestone> milestones = new ArrayList<>();
+    //         for (MilestoneDto milestoneDto : dto.getMilestones()) {
+    //             Milestone milestone = new Milestone();
+    //             milestone.setReport(savedReport);
+    //             milestone.setSequenceNo(milestoneDto.getSequenceNo());
+    //             milestone.setProjectName(milestoneDto.getProjectName());
+    //             milestone.setDetail(milestoneDto.getDetail());
+    //             milestone.setMilestoneDate(milestoneDto.getMilestoneDate());
+    //             milestone.setRagStatusId(milestoneDto.getRagStatusId());
+    //             milestones.add(milestone);
+    //         }
+    //         milestoneRepository.saveAll(milestones);
+    //         savedReport.setMilestones(milestones);
+    //     }
+
+    //     // Process workload visibility
+    //     if (dto.getWorkloadVisibility() != null) {
+    //         WorkloadVisibility workloadVisibility = new WorkloadVisibility();
+    //         workloadVisibility.setReport(savedReport);
+    //         workloadVisibility.setValue(dto.getWorkloadVisibility().getValue());
+    //         workloadVisibility.setRagStatusId(dto.getWorkloadVisibility().getRagStatusId());
+    //         workloadVisibilityRepository.save(workloadVisibility);
+    //         savedReport.setWorkloadVisibility(workloadVisibility);
+    //     }
+
+    //     // Process adequate quality
+    //     if (dto.getAdequateQuality() != null) {
+    //         AdequateQuality adequateQuality = new AdequateQuality();
+    //         adequateQuality.setReport(savedReport);
+    //         adequateQuality.setValue(dto.getAdequateQuality().getValue());
+    //         adequateQuality.setRagStatusId(dto.getAdequateQuality().getRagStatusId());
+    //         adequateQualityRepository.save(adequateQuality);
+    //         savedReport.setAdequateQuality(adequateQuality);
+    //     }
+
+    //     // Process escalations
+    //     if (dto.getEscalations() != null) {
+    //         Escalation escalation = new Escalation();
+    //         escalation.setReport(savedReport);
+    //         escalation.setHasEscalation(dto.getEscalations().isHasEscalation());
+    //         escalation.setDetails(dto.getEscalations().getDetails());
+    //         escalation.setRagStatusId(dto.getEscalations().getRagStatusId());
+    //         escalationRepository.save(escalation);
+    //         savedReport.setEscalation(escalation);
+    //     }
+
+    //     // Process trainings
+    //     if (dto.getTrainings() != null) {
+    //         Training training = new Training();
+    //         training.setReport(savedReport);
+    //         training.setTrainingDetails(dto.getTrainings().getTrainingDetails());
+    //         training.setTotalHours((float) dto.getTrainings().getTotalHours());
+    //         training.setRagStatusId(dto.getTrainings().getRagStatusId());
+    //         trainingRepository.save(training);
+    //         savedReport.setTraining(training);
+    //     }
+
+    //     // Process billability
+    //     if (dto.getBillability() != null) {
+    //         Billability billability = new Billability();
+    //         billability.setReport(savedReport);
+    //         billability.setBilledResources(dto.getBillability().getBilledResources());
+    //         billability.setUnbilledResources(dto.getBillability().getUnbilledResources());
+    //         billability.setLeavesBilled(dto.getBillability().getLeavesBilled());
+    //         billability.setLeavesUnbilled(dto.getBillability().getLeavesUnbilled());
+    //         billability.setHolidays(dto.getBillability().getHolidays());
+    //         billability.setOverallBillabilityPercent(dto.getBillability().getOverallBillabilityPercent());
+    //         billability.setRagStatusId(dto.getBillability().getRagStatusId());
+    //         billabilityRepository.save(billability);
+    //         savedReport.setBillability(billability);
+    //     }
+
+    //     // Process improvements
+    //     if (dto.getImprovements() != null) {
+    //         List<Improvement> improvements = new ArrayList<>();
+    //         for (ImprovementDto improvementDto : dto.getImprovements()) {
+    //             Improvement improvement = new Improvement();
+    //             improvement.setReport(savedReport);
+    //             improvement.setSequenceNo(improvementDto.getSequenceNo());
+    //             improvement.setArea(improvementDto.getArea());
+    //             improvement.setValueAddition(improvementDto.getValueAddition());
+    //             improvement.setRagStatusId(improvementDto.getRagStatusId());
+    //             improvements.add(improvement);
+    //         }
+    //         improvementRepository.saveAll(improvements);
+    //         savedReport.setImprovements(improvements);
+    //     }
+
+    //     // Process non-adherence
+    //     if (dto.getNonAdherence() != null) {
+    //         NonAdherence nonAdherence = new NonAdherence();
+    //         nonAdherence.setReport(savedReport);
+    //         nonAdherence.setNonAdherenceValue(dto.getNonAdherence().getNonAdherenceValue());
+    //         nonAdherence.setCount(dto.getNonAdherence().getCount());
+    //         nonAdherence.setImpact(dto.getNonAdherence().getImpact());
+    //         nonAdherence.setTimeToResolve(dto.getNonAdherence().getTimeToResolve());
+    //         nonAdherence.setRagStatusId(dto.getNonAdherence().getRagStatusId());
+    //         nonAdherenceRepository.save(nonAdherence);
+    //         savedReport.setNonAdherence(nonAdherence);
+    //     }
+
+    //     // Process timesheets
+    //     if (dto.getTimesheets() != null) {
+    //         Timesheet timesheet = new Timesheet();
+    //         timesheet.setReport(savedReport);
+    //         timesheet.setClientDefaulters(dto.getTimesheets().getClientDefaulters());
+    //         timesheet.setErpDefaulters(dto.getTimesheets().getErpDefaulters());
+    //         timesheet.setRagStatusId(dto.getTimesheets().getRagStatusId());
+    //         timesheetRepository.save(timesheet);
+    //         savedReport.setTimesheet(timesheet);
+    //     }
+
+    //     // Process innovation
+    //     if (dto.getInnovation() != null) {
+    //         Innovation innovation = new Innovation();
+    //         innovation.setReport(savedReport);
+    //         innovation.setDetails(dto.getInnovation().getDetails());
+    //         innovation.setValueAdded(dto.getInnovation().getValueAdded());
+    //         innovation.setRagStatusId(dto.getInnovation().getRagStatusId());
+    //         innovationRepository.save(innovation);
+    //         savedReport.setInnovation(innovation);
+    //     }
+
+    //     // Process risk
+    //     if (dto.getRisk() != null) {
+    //         Risk risk = new Risk();
+    //         risk.setReport(savedReport);
+    //         risk.setRiskValue(dto.getRisk().getRiskValue());
+    //         risk.setDetails(dto.getRisk().getDetails());
+    //         risk.setRagStatusId(dto.getRisk().getRagStatusId());
+    //         riskRepository.save(risk);
+    //         savedReport.setRisk(risk);
+    //     }
+
+    //     // Process showcases
+    //     if (dto.getShowcases() != null) {
+    //         List<Showcase> showcases = new ArrayList<>();
+    //         for (ShowcaseDto showcaseDto : dto.getShowcases()) {
+    //             Showcase showcase = new Showcase();
+    //             showcase.setReport(savedReport);
+    //             showcase.setSequenceNo(showcaseDto.getSequenceNo());
+    //             showcase.setDetail(showcaseDto.getDetail());
+    //             showcases.add(showcase);
+    //         }
+    //         showcaseRepository.saveAll(showcases);
+    //         savedReport.setShowcases(showcases);
+    //     }
+
+
+    //     if (savedReport != null) {
+    //         ReportHistory history = new ReportHistory();
+    //         history.setReportId(savedReport.getId());
+    //         history.setChangedBy("Default"); 
+    //         history.setNewStatus(ReportStatus.SUBMITTED.name());
+    //         history.setComment("Report updated");
+    //         reportHistoryRepository.save(history);
+    //     }
+
+    //     return convertToDto(savedReport);
+    // }
 
     @Transactional
     public void deleteReport(Long id) {
@@ -526,7 +590,7 @@ public class ReportService {
 
         ReportResponseDto dto = new ReportResponseDto();
         //dto.setId(report.getId());
-        dto.setTeamName(report.getTeam() != null ? report.getTeam().getName() : null);
+        dto.setTeamName(report.getTeamMapping() != null ? report.getTeamMapping().getName() : null);
         dto.setManagerName(report.getManager() != null ? report.getManager().getName() : null);
         dto.setOpcoName(report.getOpco() != null ? report.getOpco().getName() : null);
         dto.setClientName(report.getClientName());
@@ -534,8 +598,21 @@ public class ReportService {
         dto.setEndDate(report.getEndDate());
         //dto.setCreatedAt(report.getCreatedAt());
 
-        dto.setSummary(report.getSummary() != null ? report.getSummary().getDetail() : null);
+        dto.setBriefSummary(report.getSummary() != null ? report.getSummary().getBrief() : null);
+        dto.setDetailedSummary(report.getSummary() != null ? report.getSummary().getDetail() : null);
         
+        dto.setStatus(report.getProcessStatus());
+        dto.setReportId(report.getId());
+        if (report.getComments() != null) {
+            report.getComments().forEach(comment -> {
+            CommentResponseDto commentDto = new CommentResponseDto();
+            commentDto.setCreatedAt(comment.getCreatedAt());
+            commentDto.setComment(comment.getComment());
+            commentDto.setCommentedBy(comment.getUser().getName());
+            dto.getComments().add(commentDto);
+        });
+        }
+      
         // Milestones
         if (report.getMilestones() != null) {
             List<MilestoneDto> milestoneDtos = new ArrayList<>();
@@ -658,6 +735,58 @@ public class ReportService {
             dto.setRisk(rDto);
         }
         return dto;
+    }
+
+    public List<ReportResponseDto> getReportsByManager(Long id, String reportStatus) {
+        List<ReportResponseDto> reportDtos = new ArrayList<>();
+
+        reportRepository.findAll().stream()
+            .filter(report -> report.getManager() != null && report.getManager().getId().equals(id))
+            .filter(report -> reportStatus == null || reportStatus.isEmpty() || 
+                (report.getProcessStatus() != null && report.getProcessStatus().equalsIgnoreCase(reportStatus)))
+            .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
+            .forEach(report -> reportDtos.add(convertToDto(report)));
+
+        return reportDtos;
+    }
+
+    public List<ReportResponseDto> getReportsByOpco(Long id, String reportStatus) {
+        List<ReportResponseDto> reportDtos = new ArrayList<>();
+
+        reportRepository.findAll().stream()
+            .filter(report -> report.getOpco() != null && report.getOpco().getId().equals(id))
+            .filter(report -> reportStatus == null || reportStatus.isEmpty() || 
+                (report.getProcessStatus() != null && report.getProcessStatus().equalsIgnoreCase(reportStatus)))
+            .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
+            .forEach(report -> reportDtos.add(convertToDto(report)));
+
+        return reportDtos;
+    }
+
+    public void updateReportStatus(ReportStatusUpdateDto reportStatusUpdateDto) {
+        Report report = reportRepository.findById(reportStatusUpdateDto.getReportId()).orElse(null);
+        if (report != null) {
+            report.setProcessStatus(reportStatusUpdateDto.getNewStatus());
+            
+            ReportHistory history = new ReportHistory();
+            history.setReportId(report.getId());
+            history.setNewStatus(reportStatusUpdateDto.getNewStatus());
+            history.setPreviousStatus(report.getProcessStatus());
+            history.setChangedBy(userRepository.findById(reportStatusUpdateDto.getUserId()).orElse(null).getName());
+            history.setComment(reportStatusUpdateDto.getComment());
+            history.setChangedAt(LocalDateTime.now());
+            history.setComment(reportStatusUpdateDto.getComment());
+            reportHistoryRepository.save(history);
+
+            Comment comment = new Comment();
+            comment.setReport(report);
+            comment.setComment(reportStatusUpdateDto.getComment());
+            comment.setUser(userRepository.findById(reportStatusUpdateDto.getUserId()).orElse(null));
+            commentRepository.save(comment);
+
+            report.getComments().add(comment);
+            reportRepository.save(report);
+        }
     }
 
 }

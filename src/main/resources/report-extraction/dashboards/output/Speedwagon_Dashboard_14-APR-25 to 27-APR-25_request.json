@@ -1,0 +1,98 @@
+{
+  "teamId": 12,
+  "managerId": 12,
+  "clientName": "Allegiant",
+  "opcoId": 2,
+  "startDate": "2025-04-14",
+  "endDate": "2025-04-27",
+  "milestones": [
+    {
+      "sequenceNo": 1,
+      "projectName": "Allegiant Mobile",
+      "detail": "Enhanced the SSR functionality in manage travel flow released to Prod",
+      "milestoneDate": "2025-04-16",
+      "ragStatusId": 2
+    },
+    {
+      "sequenceNo": 2,
+      "projectName": "VIDA enterprise app",
+      "detail": "Vida enhancements on Forms and Certificate renewal release",
+      "milestoneDate": "2025-04-18",
+      "ragStatusId": 2
+    },
+    {
+      "sequenceNo": 3,
+      "projectName": "Flydesk Enterprise app",
+      "detail": "Enhancing the book marking and certificate renewal release.",
+      "milestoneDate": "2025-04-23",
+      "ragStatusId": 2
+    }
+  ],
+  "workloadVisibility": {
+    "value": "2",
+    "ragStatusId": 3
+  },
+  "adequateQuality": {
+    "value": "NA",
+    "ragStatusId": 2
+  },
+  "escalations": {
+    "hasEscalation": false,
+    "details": "",
+    "ragStatusId": 2
+  },
+  "trainings": {
+    "trainingDetails": "NA",
+    "totalHours": 0,
+    "ragStatusId": 2
+  },
+  "billability": {
+    "billedResources": 9.0,
+    "unbilledResources": 0.0,
+    "leavesBilled": 2.5,
+    "leavesUnbilled": 0.0,
+    "holidays": 1,
+    "overallBillabilityPercent": 96.91,
+    "ragStatusId": 2
+  },
+  "improvements": [
+    {
+      "sequenceNo": 1,
+      "area": "Dynatrace Usage",
+      "valueAddition": "This will help us to improve the performance and reduce the crashes.",
+      "ragStatusId": 2
+    }
+  ],
+  "nonAdherence": {
+    "nonAdherenceValue": "0",
+    "count": 0,
+    "impact": "",
+    "timeToResolve": "",
+    "ragStatusId": 2
+  },
+  "timesheets": {
+    "clientDefaulters": 0,
+    "erpDefaulters": 0,
+    "ragStatusId": 2
+  },
+  "innovation": {
+    "details": "",
+    "valueAdded": "",
+    "ragStatusId": 2
+  },
+  "risk": {
+    "riskValue": "No",
+    "details": "",
+    "ragStatusId": 2
+  },
+  "showcases": [
+    {
+      "sequenceNo": 1,
+      "detail": "Our team recognised for last quarter as TITANS from People10 Management."
+    },
+    {
+      "sequenceNo": 2,
+      "detail": ""
+    }
+  ]
+}

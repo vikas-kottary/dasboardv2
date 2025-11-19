@@ -26,4 +26,7 @@ public class Summary {
     @Column(columnDefinition = "TEXT")
     private String detail;
 
+    @Column(columnDefinition = "TEXT")
+    private String brief;
+
 }

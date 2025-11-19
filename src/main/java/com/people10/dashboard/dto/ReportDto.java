@@ -34,5 +34,7 @@ public class ReportDto {
     private InnovationDto innovation;
     private RiskDto risk;
     private List<ShowcaseDto> showcases;
-    private String summary; // Assuming summary is a simple string, adjust as needed
+    private String briefSummary;
+    private String detailedSummary;
+    private CommentDto comment;
 }

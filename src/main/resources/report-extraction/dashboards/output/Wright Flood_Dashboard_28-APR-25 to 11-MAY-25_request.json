@@ -1,0 +1,91 @@
+{
+  "teamId": 24,
+  "managerId": 23,
+  "clientName": "Wright Flood",
+  "opcoId": 4,
+  "startDate": "2025-04-28",
+  "endDate": "2025-05-11",
+  "milestones": [
+    {
+      "sequenceNo": 1,
+      "projectName": "Unified Service Portal",
+      "detail": "Prepare Admin Login UI and integrate the APIs",
+      "milestoneDate": "2025-05-09",
+      "ragStatusId": 2
+    },
+    {
+      "sequenceNo": 2,
+      "projectName": "Tryflood",
+      "detail": "Credit Card payment",
+      "milestoneDate": "2025-05-09",
+      "ragStatusId": 2
+    }
+  ],
+  "workloadVisibility": {
+    "value": "4",
+    "ragStatusId": 2
+  },
+  "adequateQuality": {
+    "value": "No bugs reported on recent changes",
+    "ragStatusId": 2
+  },
+  "escalations": {
+    "hasEscalation": false,
+    "details": "",
+    "ragStatusId": 2
+  },
+  "trainings": {
+    "trainingDetails": "AWS Udemy Course - ECS, fargate, ECR & EKS & Mandatory Training on Collaborative Workplace Respect & Teamwork",
+    "totalHours": 10,
+    "ragStatusId": 2
+  },
+  "billability": {
+    "billedResources": 5.0,
+    "unbilledResources": 0.0,
+    "leavesBilled": 1.5,
+    "leavesUnbilled": 0.0,
+    "holidays": 1,
+    "overallBillabilityPercent": 96.67,
+    "ragStatusId": 2
+  },
+  "improvements": [
+    {
+      "sequenceNo": 1,
+      "area": "Automation",
+      "valueAddition": "Implemented automation for 80% of admin portal functionalities",
+      "ragStatusId": 2
+    }
+  ],
+  "nonAdherence": {
+    "nonAdherenceValue": "0",
+    "count": 0,
+    "impact": "",
+    "timeToResolve": "",
+    "ragStatusId": 2
+  },
+  "timesheets": {
+    "clientDefaulters": 0,
+    "erpDefaulters": 0,
+    "ragStatusId": 2
+  },
+  "innovation": {
+    "details": "",
+    "valueAdded": "",
+    "ragStatusId": 2
+  },
+  "risk": {
+    "riskValue": "No",
+    "details": "",
+    "ragStatusId": 2
+  },
+  "showcases": [
+    {
+      "sequenceNo": 1,
+      "detail": ""
+    },
+    {
+      "sequenceNo": 2,
+      "detail": ""
+    }
+  ]
+}

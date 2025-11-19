@@ -2,8 +2,11 @@ package com.people10.dashboard.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.people10.dashboard.model.report.Summary;
@@ -22,31 +25,48 @@ import com.people10.dashboard.model.report.Risk;
 
 @Entity
 @Data
-@Table(name = "report")
+@Table(name = "reports")
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "team_id")
-    private Team team;
-
-    @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private Manager manager;
-
+    @Column(name = "client_name", length = 100)
     private String clientName;
 
-    @ManyToOne
-    @JoinColumn(name = "opco_id")
-    private Opco opco;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_mapping_id")
+    private TeamMapping teamMapping;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private User manager;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "opco_id")
+    private User opco;
+
+    @Column(name = "start_date")
     private LocalDate startDate;
 
+    @Column(name = "end_date")
     private LocalDate endDate;
 
-    private LocalDate createdAt;
+    @Column(name = "team_name_snapshot", length = 100)
+    private String teamNameSnapshot;
+
+    @Column(name = "manager_name_snapshot", length = 100)
+    private String managerNameSnapshot;
+
+    @Column(name = "opco_name_snapshot", length = 100)
+    private String opcoNameSnapshot;
+
+    @Column(name = "process_status", length = 55)
+    private String processStatus;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
     
     // One-to-many relationships
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -88,4 +108,7 @@ public class Report {
 
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private Summary summary;
+
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 }
